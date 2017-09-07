@@ -4,9 +4,9 @@ import numpy as np
 import datetime
 import time
 # 校园网账号
-account = '3115007525'
+account = '?????'
 # 校园网密码  
-pwd = 'yw1997521'
+pwd = '?????'
 
 School_Date = "2017,9,12"
 
