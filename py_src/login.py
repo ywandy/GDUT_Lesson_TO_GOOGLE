@@ -29,7 +29,7 @@ headers = {
 
 def login():
     s = requests.Session()
-    print(s.get("http://www.google.com/",proxies=proxies))
+    #print(s.get("http://www.google.com/",proxies=proxies))
     login_html = s.get(url)
     r = s.get(verified_url, stream=True)
 
