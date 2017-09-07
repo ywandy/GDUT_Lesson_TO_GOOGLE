@@ -1,0 +1,2 @@
+# GDUT_Lesson_TO_GOOGLE
+一键同步广工教务系统到谷歌日历
