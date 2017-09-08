@@ -68,12 +68,11 @@ def test_google():
         print(start, event['summary'])
 
 
-def Add_Lesson(google_service,cal_id,title,startdatetime,location):
+def Add_Lesson(google_service,cal_id,title,startdatetime,descript,adv):
     time_tmp = datetime.timedelta(hours=2)
     enddatetime = time_tmp+startdatetime
     test_body = {
         "summary": title,
-        "location": location,
         "start": {
             "timeZone": "Asia/Shanghai",
             "dateTime": startdatetime.isoformat("T"),
@@ -82,7 +81,16 @@ def Add_Lesson(google_service,cal_id,title,startdatetime,location):
             "timeZone": "Asia/Shanghai",
             "dateTime": enddatetime.isoformat("T"),
         },
-        "description": "test",
+        "reminders": {
+            "overrides": [
+                {
+                    "minutes": adv,
+                    "method": "popup",
+                },
+            ],
+            "useDefault": False,
+        },
+        "description": descript,
     }
     google_service.events().insert(calendarId=cal_id, body=test_body).execute()
 

@@ -116,7 +116,7 @@ def Parse_Week(gdata,element):
         if(loop==0):
             print("第一次上课时间是"+starttime.isoformat("T")+"有"+str(len(list_array))+"条记录")
         print("上课时间:" + starttime.isoformat("T"))
-        Add_Lesson(gdata,google_calendar_id,str_element_suject+"  第：" + str_element_jieshu + "节",starttime,str_element_location)
+        Add_Lesson(gdata,google_calendar_id,str_element_suject+"@" + str_element_location,starttime,str_element_jieshu+"  行政班:"+element["jxbmc"]+"  教师:"+element["teaxms"],advance_time)
 
 
 def User_Info_UI():
@@ -130,6 +130,9 @@ def User_Info_UI():
     print("输入你想汇入的日历id，可以从谷歌日历设置查询")
     global google_calendar_id
     google_calendar_id = input()
+    print("需要提前多少分钟？")
+    global advance_time
+    advance_time = input()
 
 
 
