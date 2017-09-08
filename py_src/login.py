@@ -1,14 +1,12 @@
+#encoding:utf-8
 import requests
 import re
 import numpy as np
 import datetime
-import time
-# 校园网账号
-account = '?????'
-# 校园网密码  
-pwd = '?????'
+from google_ca import *
 
-School_Date = "2017,9,12"
+#global account
+#global pwd
 
 url = 'http://222.200.98.147/'
 login_url = url + 'login!doLogin.action'                # 登录        
@@ -27,9 +25,14 @@ headers = {
         'Accept-Encoding':'gzip, deflate',
 }
 
+try:
+    import argparse
+    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+except ImportError:
+    flags = None
+
 def login():
     s = requests.Session()
-    #print(s.get("http://www.google.com/",proxies=proxies))
     login_html = s.get(url)
     r = s.get(verified_url, stream=True)
 
@@ -39,7 +42,7 @@ def login():
                 f.write(chunk)
                 f.flush()
         f.close()
-    print("input code:")
+    print("打开这个脚本的根目录里面的验证码图片，并输入验证码")
     vercode = input()
     data_login = {
         'account' : account,
@@ -57,26 +60,32 @@ def login():
     main_html = s.get(welcome_url, headers=headers)                 # 进入主界面
     return s
 
-def Inquire_Lesson(login_session):
+def Inquire_Lesson(gdata,login_session):
     inquire_html = login_session.get(Inquire_url,headers=headers)
     inquire_html.encoding='utf-8'
-    #print(inquire_html.text)
+
     str_get = re.findall(r'{".+"}',inquire_html.text)[0]
-   # print(str_get)
     t = eval(str_get)
     for i in t:
-        Apart_Infomation(i)
+        Apart_Infomation(gdata,i)
+    #Apart_Infomation(gdata,t[0])
 
 
-def Apart_Infomation(element):
+def Apart_Infomation(gdata,element):
     print("科目："+ element["kcmc"])
     print("班级:" + element["jxbmc"])
     print("第：" + element["jcdm2"] + "节")
     print("课室:" + element["jxcdmcs"])
-    Parse_Week(element["zcs"],element["jcdm2"],element["xq"])
+    Parse_Week(gdata,element)
     print("----------------------")
 
-def Parse_Week(str_element_week,str_element_time,str_element_day):
+def Parse_Week(gdata,element):
+    str_element_week = element["zcs"]
+    str_element_time = element["jcdm2"]
+    str_element_day =  element["xq"]
+    str_element_suject = element["kcmc"]
+    str_element_jieshu = element["jcdm2"]
+    str_element_location = element["jxcdmcs"]
     lesson_count = int(str_element_time[0:2])
     lesson_day = int(str_element_day) - 1
     l = str_element_week.split(",")
@@ -90,6 +99,8 @@ def Parse_Week(str_element_week,str_element_time,str_element_day):
             t = datetime.time(8, 30, 0)
         elif(lesson_count==3):
             t = datetime.time(10, 25, 0)
+        elif (lesson_count == 5):
+            t = datetime.time(13, 50, 0)
         elif (lesson_count == 6):
             t = datetime.time(14, 40, 0)
         elif (lesson_count == 8):
@@ -101,8 +112,30 @@ def Parse_Week(str_element_week,str_element_time,str_element_day):
         d = datetime.date(2017, 9 , 4+lesson_day)
         dt_c = datetime.datetime.combine(d, t)
         date_tmp = datetime.timedelta(days=int(7*(list_array[loop]-1)))
-        print("上课时间:"+str(date_tmp+dt_c))
+        starttime = date_tmp+dt_c
+        if(loop==0):
+            print("第一次上课时间是"+starttime.isoformat("T")+"有"+str(len(list_array))+"条记录")
+        print("上课时间:" + starttime.isoformat("T"))
+        Add_Lesson(gdata,google_calendar_id,str_element_suject+"  第：" + str_element_jieshu + "节",starttime,str_element_location)
+
+
+def User_Info_UI():
+    print("输入你的教务系统账号:")
+    global account
+    account = input()
+    print("输入你的教务系统密码:")
+    global pwd
+    pwd = input()
+    print(str(account)+str(pwd))
+    print("输入你想汇入的日历id，可以从谷歌日历设置查询")
+    global google_calendar_id
+    google_calendar_id = input()
+
+
+
 
 if __name__ == "__main__":
+    gdata = init_google(flags)
+    User_Info_UI()
     lg_session = login()
-    Inquire_Lesson(lg_session)
+    Inquire_Lesson(gdata,lg_session)
